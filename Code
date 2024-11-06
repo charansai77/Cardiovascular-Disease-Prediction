@@ -1,0 +1,110 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score,
+confusion_matrix, classification_report
+data = pd.read_csv("E:\Cardiovascular Disease
+22
+dataset(Major Project).csv")
+print(data.head(10))
+print(data.info())
+print(data.describe())
+numeric_columns = ['id', 'age', 'gender', 'height',
+'weight', 'ap_hi', 'ap_lo',
+ 'cholesterol', 'gluc', 'smoke',
+'alco', 'active', 'cardio']
+data[numeric_columns] =
+data[numeric_columns].apply(pd.to_numeric)
+data.dropna(inplace=True)
+plt.figure(figsize=(6, 4))
+sns.countplot(x='cardio', data=data)
+plt.title("Distribution of Target Variable")
+plt.show()
+'''sns.pairplot(data, hue='cardio',
+vars=numeric_columns[1:], diag_kind='kde')
+plt.suptitle("Pairplot of Numerical Features colored by
+Target Variable")
+plt.show()
+'''
+plt.figure(figsize=(12, 8))
+for idx, feature in enumerate(numeric_columns[1:-1]):
+ plt.subplot(3, 4, idx+1)
+ sns.boxplot(x='cardio', y=feature, data=data)
+ plt.title(f"Boxplot of {feature} by Target Variable")
+plt.tight_layout()
+plt.show()
+plt.figure(figsize=(12, 10))
+for idx, feature in enumerate(numeric_columns[1:-1]):
+ plt.subplot(3, 4, idx+1)
+ sns.histplot(data[feature], kde=True)
+ plt.title(f"Histogram of {feature}")
+plt.tight_layout()
+plt.show()
+correlation_matrix = data.corr()
+23
+plt.figure(figsize=(10, 8))
+sns.heatmap(correlation_matrix, annot=True,
+cmap='coolwarm', fmt='.2f')
+plt.title("Correlation Matrix Heatmap")
+plt.show()
+X = data[numeric_columns[1:-1]]
+y = data['cardio']
+X_train, X_test, y_train, y_test = train_test_split(X, y,
+
+test_size=0.2, random_state=42)
+svm_model = SVC(kernel='linear')
+svm_model.fit(X_train, y_train)
+svm_pred = svm_model.predict(X_test)
+svm_accuracy = accuracy_score(y_test, svm_pred)
+print("Accuracy of SVM:", svm_accuracy)
+print("Classification Report:")
+print(classification_report(y_test, svm_pred))
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, svm_pred))
+print("\nEnter person's details for prediction:")
+age = int(input("Age: "))
+gender = int(input("Gender (1 for male, 0 for female):
+"))
+height = int(input("Height (in cm): "))
+weight = int(input("Weight (in kg): "))
+ap_hi = int(input("Systolic Blood Pressure (ap_hi): "))
+ap_lo = int(input("Diastolic Blood Pressure (ap_lo): "))
+cholesterol = int(input("Cholesterol level (1, 2, or 3):
+"))
+gluc = int(input("Glucose level (1, 2, or 3): "))
+smoke = int(input("Do they smoke? (1 for yes, 0 for no):
+"))
+alco = int(input("Do they consume alcohol? (1 for yes, 0
+for no): "))
+active = int(input("Is the person physically active? (1
+for yes, 0 for no): "))
+24
+new_data = {
+ 'age': age,
+ 'gender': gender,
+ 'height': height,
+ 'weight': weight,
+ 'ap_hi': ap_hi,
+ 'ap_lo': ap_lo,
+ 'cholesterol': cholesterol,
+ 'gluc': gluc,
+ 'smoke': smoke,
+ 'alco': alco,
+ 'active': active
+}
+new_data_df = pd.DataFrame([new_data])
+prediction = svm_model.predict(new_data_df)
+if prediction[0] == 1:
+ print("The person is predicted to have cardiovascular
+disease.")
+else:
+ print("The person is predicted not to have
+cardiovascular disease.")
